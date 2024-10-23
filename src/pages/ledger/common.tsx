@@ -1,14 +1,24 @@
-import { Button, Typography, Form, Input, Row, Col, Select, Popconfirm } from 'antd';
-import { ColumnsType } from 'antd/es/table';
-import { Table } from 'antd/lib';
+import {
+  Button,
+  Typography,
+  Form,
+  Input,
+  Row,
+  Col,
+  Select,
+  Popconfirm,
+  DatePickerProps,
+  DatePicker,
+} from 'antd';
+import Table, { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 
+import { GetAllLedgers } from '@/api/services/ledgerService';
 import { IconButton, Iconify } from '@/components/icon';
 import ProTag from '@/theme/antd/components/tag';
 
 import { Ledger, LedgerParams, LedgerResponse } from '#/entity';
 import { TransactionType, UserStatus } from '#/enum';
-import { GetAllLedgers } from '@/api/services/ledgerService';
 
 export const renderStatusTag = (status: UserStatus) => {
   switch (status) {
@@ -33,17 +43,14 @@ function TransactionData({
   const [initialUsers, setInitialUsers] = useState<Ledger[]>([]);
   const [pendingRequest, setPendingRequest] = useState<number>(0);
   const [showTransactionColumns, setShowTransactionColumns] = useState(false);
-  const [filteredUsers, setFilteredUsers] = useState<Ledger[]>([]);
   const [searchForm] = Form.useForm();
-  const [searchParams, setSearchParams] = useState<{ search?: string; status?: UserStatus }>({});
-
+  const [selectedMonth, setSelectedMonth] = useState<any | null>(null);
   // Function to fetch transactions based on search parameters
   const fetchTransaction = async (params: LedgerParams = {}): Promise<LedgerResponse | void> => {
     try {
       const response = await GetAllLedgers(params);
       if (response) {
         setInitialUsers(response.users); // Set all users fetched from the API
-        setFilteredUsers(response.users); // Initialize filteredUsers with all users
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -57,36 +64,46 @@ function TransactionData({
 
   // Fetch pending requests count
   useEffect(() => {
-    const loadPendingRequests = async () => {
-      const response = await fetchTransaction({
-        type: transcation_type,
-        status: UserStatus.PENDING,
-      });
-      if (response) {
-        setPendingRequest(response.paging.total); // Assuming response contains total count
+    const fetchPendingTransactions = async () => {
+      try {
+        const response = await GetAllLedgers({
+          type: transcation_type,
+          status: UserStatus.PENDING,
+        });
+        if (response) {
+          console.log(response);
+          setPendingRequest(response.paging.total); // Assuming response contains total count
+        }
+      } catch (error) {
+        console.error('Error fetching pending transactions:', error);
       }
     };
-
-    loadPendingRequests();
+    fetchPendingTransactions(); // Call the async function inside useEffect
   }, [transcation_type]);
+  const onChange: DatePickerProps['onChange'] = (date, dateString) => {
+    console.log(dateString, 'Date', date);
+    if (!dateString) {
+      setSelectedMonth(undefined);
+      return;
+    }
 
+    setSelectedMonth(dateString);
+  };
   // Handle search form submission
   const onSearch = async (values: { search?: string; status?: UserStatus }) => {
     const { search, status } = values;
-    setSearchParams({ search, status }); // Store search params
-
     // Fetch transactions based on search params
     await fetchTransaction({
       type: transcation_type,
       search,
       status,
+      month: selectedMonth,
     });
   };
 
   const onReset = () => {
     searchForm.resetFields();
-    setFilteredUsers(initialUsers); // Reset filtered users to initial users
-    setSearchParams({}); // Reset search parameters
+    setSelectedMonth(null);
   };
 
   const handleTransactionClick = () => {
@@ -100,11 +117,11 @@ function TransactionData({
       dataIndex: ['user', 'user_name'],
     },
     {
-      title: 'Ref Id',
+      title: 'User Id',
       dataIndex: ['user', 'id'],
     },
     {
-      title: `${(transcation_type === TransactionType.WITHDRAWAL) ? 'Withdrawal' : 'Deposit'} Date`,
+      title: `${transcation_type === TransactionType.WITHDRAWAL ? 'Withdrawal' : 'Deposit'} Date`,
       dataIndex: 'created_at',
     },
     {
@@ -155,7 +172,9 @@ function TransactionData({
     <div>
       <div className="mb-3 flex w-full flex-wrap justify-between rounded-sm border-b-[1px] border-b-gray-300 px-1 py-3 shadow-sm">
         <div>
-          <Typography.Title level={5}>Transactions Requests Pending: {pendingRequest}</Typography.Title>
+          <Typography.Title level={5}>
+            Transactions Requests Pending: {pendingRequest}
+          </Typography.Title>
           <Typography.Text type="secondary">
             Tap on the button to see all the transactions requests.
           </Typography.Text>
@@ -184,14 +203,19 @@ function TransactionData({
 
       <Form form={searchForm} layout="vertical" onFinish={onSearch}>
         <Row gutter={16}>
-          <Col span={8}>
+          <Col span={4}>
             <Form.Item label="Search" name="search">
               <Input placeholder="Search by name" />
             </Form.Item>
           </Col>
+          <Col span={4}>
+            <Form.Item label="Month" name="month">
+              <DatePicker onChange={onChange} picker="month" />
+            </Form.Item>
+          </Col>
 
           {showTransactionColumns && (
-            <Col span={6}>
+            <Col span={4}>
               <Form.Item label="Status" name="status">
                 <Select placeholder="Select status">
                   <Select.Option value={UserStatus.PENDING}>
@@ -208,7 +232,7 @@ function TransactionData({
             </Col>
           )}
 
-          <Col span={showTransactionColumns ? 8 : 16}>
+          <Col span={showTransactionColumns ? 5 : 16}>
             <Form.Item label=" " colon={false}>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <Button type="primary" htmlType="submit">
@@ -224,7 +248,7 @@ function TransactionData({
       <Table
         rowKey="id"
         columns={columns}
-        dataSource={filteredUsers} // This will now be populated by API response based on search
+        dataSource={initialUsers} // This will now be populated by API response based on search
         pagination={{
           pageSize: 10,
         }}

@@ -1,16 +1,16 @@
-import { Button, Card, Input,Row, Col, Form, DatePicker } from 'antd';
+import { Button, Card, Input, Row, Col, Form, DatePicker } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
 import { useState, useEffect } from 'react';
 
 import userService, { FetchUserParams } from '@/api/services/userService';
 import { IconButton, Iconify } from '@/components/icon';
+import { useRouter } from '@/router/hooks';
 
 import { UserModal, UserModalProps } from './user-modal';
 
 import { User, UsersList } from '#/entity';
 import { UserStatus } from '#/enum';
 import type { DatePickerProps } from 'antd';
-import { useRouter } from '@/router/hooks';
 
 const DEFAULT_USER_VALUE: User = {
   user_name: '',
@@ -37,13 +37,12 @@ export default function UserPage() {
     onCancel: () => {
       setUserModalProps((prev) => ({ ...prev, show: false }));
     },
-  });;
+  });
 
-  const fetchUsers = async (params: FetchUserParams={}) => {
+  const fetchUsers = async (params: FetchUserParams = {}) => {
     try {
       const { users } = await userService.fetchUser(params);
       setUsers(users);
-      
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -71,9 +70,11 @@ export default function UserPage() {
       width: 100,
       render: (_, record) => (
         <div className="flex w-full justify-center text-gray">
-          <IconButton  onClick={() => {
+          <IconButton
+            onClick={() => {
               push(`/management/user-details/${record.id}`);
-            }}>
+            }}
+          >
             <Iconify icon="carbon:view-filled" size={18} />
           </IconButton>
         </div>
@@ -91,14 +92,17 @@ export default function UserPage() {
   };
 
   const onChange: DatePickerProps['onChange'] = (date, dateString) => {
-    console.log(dateString,'Date',date);
-    if(!dateString) { setSelectedMonth(undefined); return; };
-    
-    setSelectedMonth(dateString)
+    console.log(dateString, 'Date', date);
+    if (!dateString) {
+      setSelectedMonth(undefined);
+      return;
+    }
+
+    setSelectedMonth(dateString);
   };
   const onSearch = async (values: { search?: string }) => {
-    let params={ ...values, month: selectedMonth }
-    if(!values.search) params.search = undefined;
+    const params = { ...values, month: selectedMonth };
+    if (!values.search) params.search = undefined;
     await fetchUsers(params);
   };
 
