@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  // 使用 "class" 模式时，Tailwind 会将 "dark" 类添加到根元素（通常是 <body> 元素）上，以指示页面当前处于深色模式
+  // When using "class" mode, Tailwind will add the "dark" class to the root element (usually the <body> element) to indicate that the page is currently in dark mode
   darkMode: 'class',
-  // 通过配置 content，Tailwind CSS 将会检索和构建包含需要的 CSS 样式的文件，并生成最终的 CSS 输出文件
+  // By configuring content, Tailwind CSS will retrieve and build files containing the required CSS styles and generate the final CSS output file
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     screens: {

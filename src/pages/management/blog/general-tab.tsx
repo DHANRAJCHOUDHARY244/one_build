@@ -1,5 +1,5 @@
 /* eslint-disable react/no-danger */
-import { App, Button, Col, Form, Input, Row, Select,UploadFile } from 'antd';
+import { App, Button, Col, Form, Input, Row, UploadFile } from 'antd';
 import { useState } from 'react';
 
 import Card from '@/components/card';

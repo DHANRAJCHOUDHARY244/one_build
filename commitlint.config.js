@@ -1,29 +1,29 @@
 export default {
-  // 继承的规则
+  // Inherited rules
   extends: ['@commitlint/config-conventional'],
-  // 定义规则类型
+  // Define rule type
   rules: {
-    'body-leading-blank': [2, 'always'], // 确保提交消息正文之前有一行空白行
-    'type-empty': [2, 'never'], // 不允许提交消息的 type 类型为空
-    'subject-case': [0], // subject 大小写不做校验
-    // type 类型定义，表示 git 提交的 type 必须在以下类型范围内
+    'body-leading-blank': [2, 'always'], // Ensure there is a blank line before the commit message body
+    'type-empty': [2, 'never'], // The type type of the submitted message is not allowed to be empty
+    'subject-case': [0], // Subject case is not checked
+    // type type definition, indicating that the type submitted by git must be within the following type range
     'type-enum': [
       2,
       'always',
       [
-        'feat', // 新功能 feature
-        'fix', // 修复 bug
-        'docs', // 文档注释
-        'style', // 代码格式(不影响代码运行的变动)
-        'refactor', // 重构(既不增加新功能，也不是修复bug)
-        'perf', // 性能优化
-        'test', // 添加疏漏测试或已有测试改动
-        'chore', // 构建过程或辅助工具的变动
-        'revert', // 回滚commit
-        'build', // 构建流程、外部依赖变更 (如升级 npm 包、修改打包配置等)',
-        'ci', // 修改CI配置、脚本
-        'types', // 类型定义文件修改
-        'wip', // 开发中
+        'feat', // new feature feature
+        'fix', // fix bug
+        'docs', // Documentation comments
+        'style', // Code format (changes that do not affect code operation)
+        'refactor', // Refactor (neither adding new features nor fixing bugs)
+        'perf', // performance optimization
+        'test', // Add missing tests or existing test changes
+        'chore', // Changes to the build process or auxiliary tools
+        'revert', // rollback commit
+        'build', // Build process, external dependency changes (such as upgrading npm packages, modifying packaging configuration, etc.)',
+        'ci', // Modify CI configuration and script
+        'types', // Type definition file modification
+        'wip', // under development
       ],
     ],
   },
