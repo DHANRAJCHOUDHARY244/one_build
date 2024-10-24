@@ -21,18 +21,15 @@ jobs:
           PASSWORD=${{ secrets.SSH_PASSWORD }}  # Access the stored password
 
           /usr/bin/expect << EOF
-          set timeout -1  # No timeout, wait for all commands to complete
+          set timeout -1  # Set an infinite timeout
           # Start the SSH connection
           spawn ssh $USER@$HOST "bash -l"
           expect {
-            # Handle the password prompt
             "*?assword:*" { send "$PASSWORD\r" }
-            # Handle the authenticity prompt
             "*Are you sure you want to continue connecting (yes/no)?*" {
               send "yes\r"
               exp_continue
             }
-            # In case of a new key fingerprint prompt
             "*ED25519 key fingerprint is*" {
               send "yes\r"
               exp_continue
