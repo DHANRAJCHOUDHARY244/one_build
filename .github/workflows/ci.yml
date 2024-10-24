@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Checkout code 🛎️
         uses: actions/checkout@v3
-
+        
       - name: Install Expect
         run: sudo apt-get install -y expect
 
@@ -27,7 +27,13 @@ jobs:
           /usr/bin/expect -c "
           set timeout 10
           spawn ssh $USER@$HOST
-          expect \"*?assword:*\" { send \"$PASSWORD\r\" }
+          expect {
+            \"*?assword:*\" { send \"$PASSWORD\r\" }
+            \"*Are you sure you want to continue connecting (yes/no)?*\" {
+              send \"yes\r\"
+              exp_continue
+            }
+          }
           expect \"*#\" { send \"cd /var/www/one-build-cms\r\" }
           expect \"*#\" { send \"git pull\r\" }
           expect \"*#\" { send \"npm install\r\" }
