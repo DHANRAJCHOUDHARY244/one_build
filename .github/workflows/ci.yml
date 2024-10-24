@@ -20,27 +20,29 @@ jobs:
           USER="root"
           PASSWORD=${{ secrets.SSH_PASSWORD }}  # Access the stored password
 
-          /usr/bin/expect << EOF
+          /usr/bin/expect -c "
+          set timeout 10
           # Start the SSH connection
-          spawn ssh $USER@$HOST "bash -l"
+          spawn ssh $USER@$HOST
           expect {
-            "*?assword:*" { send "$PASSWORD\r" }
-            "*Are you sure you want to continue connecting (yes/no)?*" {
-              send "yes\r"
+            # Handle the password prompt
+            \"*?assword:*\" { send \"$PASSWORD\r\" }
+            # Handle the authenticity prompt
+            \"*Are you sure you want to continue connecting (yes/no)?*\" {
+              send \"yes\r\"
               exp_continue
             }
-            "*ED25519 key fingerprint is*" {
-              send "yes\r"
+            # In case of a new key fingerprint prompt
+            \"*ED25519 key fingerprint is*\" {
+              send \"yes\r\"
               exp_continue
             }
           }
-
-          # Navigate to the directory and run commands immediately without waiting for completion
-          send "cd /var/www/one-build-cms\r"
-          send "git pull\r"
-          send "npm install\r"
-          send "npm run build\r"
-          send "apt install && apt update -y\r"
-
+          # Navigate to the directory and run commands
+          expect \"*#\" { send \"cd /var/www/one-build-cms\r\" }
+          expect \"*#\" { send \"git pull\r\" }
+          expect \"*#\" { send \"npm install\r\" }
+          expect \"*#\" { send \"npm run build\r\" }
+          expect \"*#\" { send \"apt update && apt upgrade\r\" }
           expect eof
-          EOF
+          "
