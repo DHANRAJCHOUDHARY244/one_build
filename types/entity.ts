@@ -200,3 +200,17 @@ export type BlogPostData = {
   content: string;
   images?: File; // Optional image file
 };
+
+export interface LatestBlog {
+  id: number;
+  title: string;
+  content: string;
+  created_at: string; // or Date if you prefer to work with Date objects
+  media: Media;
+}
+
+export interface NewsBlogsResponse {
+    news_blogs: LatestBlog[]; // Adjust the type based on your news blog structure
+    paging: Paging;
+    latest_blog: LatestBlog;
+}

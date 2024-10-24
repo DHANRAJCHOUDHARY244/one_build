@@ -14,8 +14,8 @@ type FieldType = {
 
 export default function GeneralTab() {
   const { notification } = App.useApp();
-  const [quillFull, setQuillFull] = useState(''); // State for editor content
-
+  const [quillFull, setQuillFull] = useState(''); 
+  const [title,setTitle]=useState('');
   const initFormValues = {
     name: '',
   };
@@ -32,7 +32,7 @@ export default function GeneralTab() {
     try {
       // Prepare the data to send to the saveBlogPost function
       const blogData: BlogPostData = {
-        title: initFormValues.name, // You might want to get the name from the form state
+        title: title, // You might want to get the name from the form state
         content: quillFull,
         images: fileList.length > 0 ? fileList[0].originFileObj as File : undefined, // Only set if exists
       };
@@ -72,7 +72,7 @@ export default function GeneralTab() {
             <Row gutter={16}>
               <Col span={24}>
                 <Form.Item<FieldType> label="Blog Title" name="name">
-                  <Input />
+                  <Input  placeholder='Enter title' onChange={(e)=>setTitle(e.target.value)}/>
                 </Form.Item>
               </Col>
             </Row>

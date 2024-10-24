@@ -1,42 +1,11 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import { useState } from 'react';
-
-import blogImg from '@/assets/images/background/overlay_2.jpg';
 
 import ArticleList from './blogItem';
-import AddContentModal from './createBlog';
+import { useRouter } from '@/router/hooks';
 
 function Blog() {
-  const [writeMode, setWriteMode] = useState(false);
-  const articles = [
-    {
-      id: 1,
-      imgSrc: blogImg,
-      title: 'Lorem ipsum dolor sit amet consectetur.',
-      description: 'Dignissim aliquam mattis quam',
-      date: 'December 19, 2022',
-    },
-    {
-      id: 2,
-      imgSrc: blogImg,
-      title: 'Lorem ipsum dolor sit amet consectetur.',
-      description: 'Dignissim aliquam mattis quam',
-      date: 'December 19, 2022',
-    },
-    {
-      id: 3,
-      imgSrc: blogImg,
-      title: 'Lorem ipsum dolor sit amet consectetur.',
-      description: 'Dignissim aliquam mattis quam',
-      date: 'December 19, 2022',
-    },
-  ];
-
+  const { push } = useRouter();
   return (
-    <>
-      {writeMode ? (
-        <AddContentModal isOpen={writeMode} onClose={() => setWriteMode(false)} />
-      ) : (
         <section className="text-white p-4">
           <section className="bg-white mb-4 flex items-center justify-between rounded-lg p-4 shadow-lg">
             <div>
@@ -45,7 +14,7 @@ function Blog() {
             </div>
             <button
               className="rounded-lg bg-gradient-to-r from-[#9d2721] to-[#be2119] px-6 py-2 text-[white] shadow-md hover:bg-[#9D2721]"
-              onClick={() => setWriteMode(true)}
+              onClick={() => push("/management/create-blog")}
             >
               Create New
             </button>
@@ -56,11 +25,9 @@ function Blog() {
             </span>
           </div>
           <div className="space-y-4">
-            <ArticleList articles={articles} />
+            <ArticleList />
           </div>
         </section>
-      )}
-    </>
   );
 }
 
