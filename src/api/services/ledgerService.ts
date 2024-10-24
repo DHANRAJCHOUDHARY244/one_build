@@ -9,7 +9,7 @@ const enum LedgerApi {
 }
 
 const GetAllLedgers = async (ledgerParams: LedgerParams) => {
-  const { type, page, page_size: pageSize, month, status } = ledgerParams;
+  const { type, page, page_size: pageSize, month, status,search } = ledgerParams;
 
   // Build params dynamically, excluding undefined values
   const params: any = {};
@@ -18,6 +18,7 @@ const GetAllLedgers = async (ledgerParams: LedgerParams) => {
   if (pageSize !== undefined) params.page_size = pageSize;
   if (month) params.month = month;
   if (status) params.status = status;
+  if (search) params.search = search;
 
   return apiClient.get<LedgerResponse>({
     url: LedgerApi.getAllLedgers,
