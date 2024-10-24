@@ -21,7 +21,7 @@ jobs:
           PASSWORD=${{ secrets.SSH_PASSWORD }}  # Access the stored password
 
           /usr/bin/expect -c "
-          set timeout 10
+          set timeout -1  # Set to -1 to wait for command completion indefinitely
           # Start the SSH connection
           spawn ssh $USER@$HOST
           expect {
@@ -42,6 +42,13 @@ jobs:
           expect \"*#\" { send \"cd /var/www/one-build-cms\r\" }
           expect \"*#\" { send \"git pull\r\" }
           expect \"*#\" { send \"npm install\r\" }
+          
+          # Run the build process and wait for it to complete
           expect \"*#\" { send \"npm run build\r\" }
-          expect eof
+
+          # Ensure the process waits for completion
+          expect {
+            \"*#\" { send \"exit\r\" }
+            eof
+          }
           "
