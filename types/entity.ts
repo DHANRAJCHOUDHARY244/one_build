@@ -194,3 +194,9 @@ export interface DepositDetailsResponse {
       updated_at: string;
     };
 }
+
+export type BlogPostData = {
+  title: string;
+  content: string;
+  images?: File; // Optional image file
+};

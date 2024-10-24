@@ -1,57 +1,65 @@
 /* eslint-disable react/no-danger */
-import { faker } from '@faker-js/faker';
-import { App, Button, Col, Form, Input, Row, Select } from 'antd';
+import { App, Button, Col, Form, Input, Row, Select,UploadFile } from 'antd';
 import { useState } from 'react';
 
 import Card from '@/components/card';
-import { UploadBlogImage } from '@/components/upload';
-import { useUserInfo } from '@/store/userStore';
 import Editor from '@/components/editor';
 import BlogMobileView from './mobileView';
-
+import UploadCropImage from './upload';
+import { BlogPostData } from '#/entity';
+import blogService from '@/api/services/blogService';
 type FieldType = {
   name?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  code?: string;
-  about: string;
 };
 
 export default function GeneralTab() {
   const { notification } = App.useApp();
-  const { avatar, user_name, email } = useUserInfo();
   const [quillFull, setQuillFull] = useState(''); // State for editor content
-  const [uploadedImage, setUploadedImage] = useState(''); // State for uploaded image
 
   const initFormValues = {
-    name: user_name,
-    email,
-    phone: faker.phone.number(),
-    address: faker.location.county(),
-    city: faker.location.city(),
-    code: faker.location.zipCode(),
-    about: faker.lorem.paragraphs(),
+    name: '',
   };
 
-  // Handle blog image upload
-  const handleImageUpload = (url: string) => {
-    setUploadedImage(url); // Set the uploaded image URL
+  const [fileList, setFileList] = useState<UploadFile[]>([]); // State to hold the file list
+
+
+  const handleFileListUpdate = (newFileList: UploadFile[]) => {
+    console.log("Updated File List:", newFileList);
+    setFileList(newFileList); // Update the file list state
   };
 
-  const handleClick = () => {
-    notification.success({
-      message: 'Update success!',
-      duration: 3,
-    });
-  };
+  const handleClick = async () => {
+    try {
+      // Prepare the data to send to the saveBlogPost function
+      const blogData: BlogPostData = {
+        title: initFormValues.name, // You might want to get the name from the form state
+        content: quillFull,
+        images: fileList.length > 0 ? fileList[0].originFileObj as File : undefined, // Only set if exists
+      };
 
+      // Call the saveBlogPost function
+      await blogService.saveBlogPost(blogData);
+
+      // Notify user of success
+      notification.success({
+        message: 'Update success!',
+        duration: 3,
+      });
+    } catch (error) {
+      // Handle error
+      console.error('Error while saving blog post:', error);
+      notification.error({
+        message: 'Update failed!',
+        description: 'An error occurred while saving the blog post.',
+        duration: 3,
+      });
+    }
+  };
   return (
     <Row gutter={[16, 16]}>
       <Col span={24} lg={8}>
         {/* Pass the content and image URL to BlogMobileView */}
-        <BlogMobileView content={quillFull} imageSrc={uploadedImage} />
+        <BlogMobileView content={quillFull} fileList={fileList} />
       </Col>
       <Col span={24} lg={16}>
         <Card>
@@ -67,14 +75,6 @@ export default function GeneralTab() {
                   <Input />
                 </Form.Item>
               </Col>
-              <Col span={24}>
-                <Form.Item name="status" label="Type">
-                  <Select placeholder="Select status">
-                    <Select.Option value="News">News</Select.Option>
-                    <Select.Option value="Blogs">Blogs</Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
             </Row>
 
             <Row gutter={16}>
@@ -84,7 +84,9 @@ export default function GeneralTab() {
               </Col>
               <Col span={12}>
                 {/* Upload blog image and update state */}
-                <UploadBlogImage defaultAvatar={avatar} onUpload={handleImageUpload} />
+                <UploadCropImage 
+                 handleFileListUpdate={handleFileListUpdate} // Pass the function to update the file list
+                 />
               </Col>
             </Row>
 
