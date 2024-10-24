@@ -297,7 +297,7 @@ function TransactionData({
           showSizeChanger
         />
       </Card>
-      <ActionModal {...reqChangeModalProps}  />
+      <ActionModal {...reqChangeModalProps}  fetchTransaction={fetchTransaction}   />
     </div>
   );
 }

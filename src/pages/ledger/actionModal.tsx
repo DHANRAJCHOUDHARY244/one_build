@@ -1,4 +1,4 @@
-import { DepositDetailsResponse, WithdrawDetailsResponse } from '#/entity';
+import { DepositDetailsResponse, LedgerParams, WithdrawDetailsResponse } from '#/entity';
 import { TransactionType, UserStatus } from '#/enum';
 import {
   UpdateLedgerDepositRequest,
@@ -21,11 +21,13 @@ export function ActionModal({
   show,
   onCancel,
   transcation_type,
+  fetchTransaction,
 }: {
   user: UserData;
   show: boolean;
   onCancel: VoidFunction;
   transcation_type: TransactionType;
+  fetchTransaction: (params: LedgerParams) => Promise<void>; 
 }) {
   const [reqType, setReqType] = useState<UserStatus | null>(null);
   const [responseDataWihdraw, setResonseDataWihdraw] = useState<WithdrawDetailsResponse | null>(
@@ -55,7 +57,7 @@ export function ActionModal({
           transaction_id: user.id,
           status: type,
         });
-
+        
         // Check if deposit_details is valid and matches expected type
         if (response) {
           setResonseDataDeposit(response); // Assign valid data
@@ -63,6 +65,11 @@ export function ActionModal({
           setResonseDataDeposit(null); // Explicitly set to null if no data
         }
       }
+      setTimeout(() => {
+        fetchTransaction({
+          type: transcation_type,
+        })
+      }, 1000);
       setTimeout(() => {
         setResonseDataWihdraw(null); // Reset responseData after the timeout
         setResonseDataDeposit(null); // Explicitly set to null if no data
