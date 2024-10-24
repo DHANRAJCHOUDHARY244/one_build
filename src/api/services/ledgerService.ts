@@ -1,6 +1,6 @@
 import apiClient from '../apiClient';
 
-import { LedgerParams, LedgerResponse, UpdateLedgerDeposit, UpdateLedgerWithdraw } from '#/entity';
+import { DepositDetailsResponse, LedgerParams, LedgerResponse, UpdateLedgerDeposit, UpdateLedgerWithdraw, WithdrawDetailsResponse } from '#/entity';
 
 const enum LedgerApi {
   getAllLedgers = '/admin/auth/approved-transactions',
@@ -27,7 +27,7 @@ const GetAllLedgers = async (ledgerParams: LedgerParams) => {
 
 // Update deposit request
 const UpdateLedgerDepositRequest = async (data: UpdateLedgerDeposit) => {
-  return apiClient.post<any>({
+  return apiClient.post<DepositDetailsResponse>({
     url: LedgerApi.updateLedgerDepositRequest,
     data,
   });
@@ -35,7 +35,7 @@ const UpdateLedgerDepositRequest = async (data: UpdateLedgerDeposit) => {
 
 // Update withdrawal request
 const UpdateLedgerWithdrawRequest = async (data: UpdateLedgerWithdraw) => {
-  return apiClient.post<any>({
+  return apiClient.post<WithdrawDetailsResponse>({
     url: LedgerApi.updateLedgerWithdrawRequest,
     data,
   });

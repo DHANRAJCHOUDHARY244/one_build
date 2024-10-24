@@ -1,4 +1,4 @@
-import { Button, Card, Input, Row, Col, Form, DatePicker } from 'antd';
+import { Button, Card, Input, Row, Col, Form, DatePicker, Pagination } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
 import { useState, useEffect } from 'react';
 
@@ -29,7 +29,9 @@ export default function UserPage() {
   const [users, setUsers] = useState<UsersList[]>([]);
   const [searchForm] = Form.useForm();
   const [selectedMonth, setSelectedMonth] = useState<any | null>(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [userModalProps, setUserModalProps] = useState<UserModalProps>({
     formValue: { ...DEFAULT_USER_VALUE },
     title: 'New',
@@ -41,8 +43,9 @@ export default function UserPage() {
 
   const fetchUsers = async (params: FetchUserParams = {}) => {
     try {
-      const { users } = await userService.fetchUser(params);
+      const { users,paging } = await userService.fetchUser(params);
       setUsers(users);
+      setTotalRecords(paging.total)
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -101,10 +104,22 @@ export default function UserPage() {
     setSelectedMonth(dateString);
   };
   const onSearch = async (values: { search?: string }) => {
-    const params = { ...values, month: selectedMonth };
+    const params = { ...values, month: selectedMonth, page: currentPage,
+      page_size: pageSize, };
     if (!values.search) params.search = undefined;
     await fetchUsers(params);
   };
+  const handlePaginationChange = (page: number, pageSize?: number) => {
+    setCurrentPage(page);
+    setPageSize(pageSize || 10); // Default to 10 if pageSize is undefined
+    fetchUsers({
+      page,
+      page_size: pageSize,
+      search: searchForm.getFieldValue('search'), 
+      month: selectedMonth,
+    });
+  };
+
 
   const onReset = () => {
     searchForm.resetFields();
@@ -156,6 +171,15 @@ export default function UserPage() {
       />
 
       <UserModal {...userModalProps} />
+      <Card>
+        <Pagination
+          current={currentPage}
+          pageSize={pageSize}
+          total={totalRecords}
+          onChange={handlePaginationChange}
+          showSizeChanger
+        />
+      </Card>
     </Card>
   );
 }

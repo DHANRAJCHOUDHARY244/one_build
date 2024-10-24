@@ -6,9 +6,10 @@ import {
   Row,
   Col,
   Select,
-  Popconfirm,
   DatePickerProps,
   DatePicker,
+  Pagination,
+  Card,
 } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
@@ -17,8 +18,9 @@ import { GetAllLedgers } from '@/api/services/ledgerService';
 import { IconButton, Iconify } from '@/components/icon';
 import ProTag from '@/theme/antd/components/tag';
 
-import { Ledger, LedgerParams, LedgerResponse } from '#/entity';
+import { Ledger, LedgerParams} from '#/entity';
 import { TransactionType, UserStatus } from '#/enum';
+import { ActionModal} from './actionModal';
 
 export const renderStatusTag = (status: UserStatus) => {
   switch (status) {
@@ -45,12 +47,24 @@ function TransactionData({
   const [showTransactionColumns, setShowTransactionColumns] = useState(false);
   const [searchForm] = Form.useForm();
   const [selectedMonth, setSelectedMonth] = useState<any | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [reqChangeModalProps, setReqChangeModalProps] = useState({
+    user: { id: 0, amount: 0, user_name: '', created_at: '' },
+    show: false, // Initially set to false
+    onCancel: () => setReqChangeModalProps((prev) => ({ ...prev, show: false })),
+    transcation_type: transcation_type,
+  });
+  
+
   // Function to fetch transactions based on search parameters
-  const fetchTransaction = async (params: LedgerParams = {}): Promise<LedgerResponse | void> => {
+  const fetchTransaction = async (params: LedgerParams = {}): Promise<void> => {
     try {
       const response = await GetAllLedgers(params);
       if (response) {
         setInitialUsers(response.users); // Set all users fetched from the API
+        setTotalRecords(response.paging.total); // Update total records for pagination
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -59,8 +73,12 @@ function TransactionData({
 
   // Fetch initial transactions when the component mounts
   useEffect(() => {
-    fetchTransaction({ type: transcation_type });
-  }, [transcation_type]);
+    fetchTransaction({
+      type: transcation_type,
+      page: currentPage,
+      page_size: pageSize,
+    });
+  }, [transcation_type, currentPage, pageSize]);
 
   // Fetch pending requests count
   useEffect(() => {
@@ -71,32 +89,42 @@ function TransactionData({
           status: UserStatus.PENDING,
         });
         if (response) {
-          console.log(response);
-          setPendingRequest(response.paging.total); // Assuming response contains total count
+          setPendingRequest(response.paging.total);
         }
       } catch (error) {
         console.error('Error fetching pending transactions:', error);
       }
     };
-    fetchPendingTransactions(); // Call the async function inside useEffect
+    fetchPendingTransactions();
   }, [transcation_type]);
-  const onChange: DatePickerProps['onChange'] = (date, dateString) => {
-    console.log(dateString, 'Date', date);
-    if (!dateString) {
-      setSelectedMonth(undefined);
-      return;
-    }
 
-    setSelectedMonth(dateString);
+  const onChange: DatePickerProps['onChange'] = (date, dateString) => {
+    console.log(date);
+    setSelectedMonth(dateString || null);
   };
-  // Handle search form submission
+
+  // Handle search form submission with pagination included
   const onSearch = async (values: { search?: string; status?: UserStatus }) => {
     const { search, status } = values;
-    // Fetch transactions based on search params
     await fetchTransaction({
       type: transcation_type,
       search,
       status,
+      month: selectedMonth,
+      page: currentPage,
+      page_size: pageSize,
+    });
+  };
+
+  const handlePaginationChange = (page: number, pageSize?: number) => {
+    setCurrentPage(page);
+    setPageSize(pageSize || 10); // Default to 10 if pageSize is undefined
+    fetchTransaction({
+      type: transcation_type,
+      page,
+      page_size: pageSize,
+      search: searchForm.getFieldValue('search'), // Include current search/filter values
+      status: searchForm.getFieldValue('status'),
       month: selectedMonth,
     });
   };
@@ -104,6 +132,11 @@ function TransactionData({
   const onReset = () => {
     searchForm.resetFields();
     setSelectedMonth(null);
+    fetchTransaction({
+      type: transcation_type,
+      page: 1,
+      page_size: pageSize,
+    });
   };
 
   const handleTransactionClick = () => {
@@ -146,22 +179,25 @@ function TransactionData({
         key: 'operation',
         align: 'center',
         width: 100,
-        render: (_) => (
+        render: (record) => (
           <div className="flex w-full justify-center text-gray">
-            <IconButton onClick={() => console.log('Edit')}>
-              <Iconify icon="solar:pen-bold-duotone" size={18} />
-            </IconButton>
-            <Popconfirm
-              title="Delete the User"
-              okText="Yes"
-              cancelText="No"
-              placement="left"
-              onConfirm={() => console.log('Delete')}
-            >
-              <IconButton>
-                <Iconify icon="mingcute:delete-2-fill" size={18} className="text-error" />
-              </IconButton>
-            </Popconfirm>
+           <IconButton
+  onClick={() => {
+    setReqChangeModalProps((prev) => ({
+      ...prev,
+      user: {
+        id: record.user.id,
+        amount: record.amount,
+        user_name: record.user.user_name,
+        created_at: record.created_at,
+      },
+      show: true, // Ensure modal is set to visible
+    }));
+  }}
+>
+  <Iconify icon="solar:pen-bold-duotone" size={18} />
+</IconButton>
+
           </div>
         ),
       },
@@ -248,11 +284,20 @@ function TransactionData({
       <Table
         rowKey="id"
         columns={columns}
-        dataSource={initialUsers} // This will now be populated by API response based on search
-        pagination={{
-          pageSize: 10,
-        }}
+        dataSource={initialUsers}
+        pagination={false} // Disable table's built-in pagination
       />
+
+      <Card>
+        <Pagination
+          current={currentPage}
+          pageSize={pageSize}
+          total={totalRecords}
+          onChange={handlePaginationChange}
+          showSizeChanger
+        />
+      </Card>
+      <ActionModal {...reqChangeModalProps}  />
     </div>
   );
 }

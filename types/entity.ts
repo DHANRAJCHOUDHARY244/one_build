@@ -29,6 +29,7 @@ export interface UsersList {
 
 export interface FetchUserInfo {
  users:UsersList[];
+ paging:Paging;
 }
 
 export interface Organization {
@@ -64,13 +65,13 @@ export interface LedgerParams {
 
 // Interface for updating ledger deposit request
 export interface UpdateLedgerDeposit {
-  transaction_id: string;
+  transaction_id: any;
   status: UserStatus;
 }
 
 // Interface for updating ledger withdrawal request
 export interface UpdateLedgerWithdraw {
-  withdraw_request_id: string;
+  withdraw_request_id: any;
   status: UserStatus;
 }
 // Interface for paging details
@@ -165,3 +166,31 @@ export interface UserByIdResponseData {
   user_referrals: UserReferral[];
 }
 
+// Interface for Withdraw Details API Response
+export interface WithdrawDetailsResponse {
+    withdraw_details: {
+      id: number;
+      bank_name: string;
+      beneficiary_name: string;
+      account_number: string;
+      ifsc_code: string;
+      branch: string;
+      amount: number;
+      active: boolean;
+      status: string;
+      created_at: string;
+      updated_at: string;
+    };
+}
+
+// Interface for Deposit Details API Response
+export interface DepositDetailsResponse {
+    deposit_details: {
+      id: number;
+      transaction_id: string;
+      amount: number;
+      status: string;
+      created_at: string;
+      updated_at: string;
+    };
+}
