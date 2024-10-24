@@ -1,4 +1,4 @@
-name: Deploy to Remote Server
+name: SSH Deployment
 
 on:
   push:
@@ -8,36 +8,40 @@ on:
 
 jobs:
   deploy:
-
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Specify the OS if needed
 
     steps:
-      - name: Checkout code 🛎️
-        uses: actions/checkout@v3
-
       - name: Install Expect
         run: sudo apt-get install -y expect
 
       - name: SSH and execute commands
         run: |
-          PASSWORD=${{ secrets.SSH_PASSWORD }}  # Store your password in GitHub secrets
           HOST="194.238.22.108"
           USER="root"
+          PASSWORD=${{ secrets.SSH_PASSWORD }}  # Access the stored password
 
           /usr/bin/expect -c "
           set timeout 10
+          # Start the SSH connection
           spawn ssh $USER@$HOST
           expect {
+            # Handle the password prompt
             \"*?assword:*\" { send \"$PASSWORD\r\" }
+            # Handle the authenticity prompt
             \"*Are you sure you want to continue connecting (yes/no)?*\" {
               send \"yes\r\"
               exp_continue
             }
+            # In case of a new key fingerprint prompt
+            \"*ED25519 key fingerprint is*\" {
+              send \"yes\r\"
+              exp_continue
+            }
           }
+          # Navigate to the directory and run commands
           expect \"*#\" { send \"cd /var/www/one-build-cms\r\" }
           expect \"*#\" { send \"git pull\r\" }
           expect \"*#\" { send \"npm install\r\" }
           expect \"*#\" { send \"npm run build\r\" }
           expect eof
           "
-
