@@ -38,11 +38,7 @@ jobs:
               exp_continue
             }
           }
-          # Navigate to the directory and run commands
-          expect \"*#\" { send \"cd /var/www/one-build-cms\r\" }
-          expect \"*#\" { send \"git pull\r\" }
-          expect \"*#\" { send \"npm install\r\" }
-          expect \"*#\" { send \"npm run build\r\" }
-          expect \"*#\" { send \"apt update && apt upgrade\r\" }
+          # Navigate to the directory and run the commands in sequence using &&
+          expect \"*#\" { send \"cd /var/www/one-build-cms && git pull && npm install && npm run build && apt update && apt upgrade -y\r\" }
           expect eof
           "
