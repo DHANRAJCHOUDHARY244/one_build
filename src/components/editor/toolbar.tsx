@@ -18,7 +18,6 @@ export const formats = [
   'font',
   'formula',
   'header',
-  'image',
   'indent',
   'italic',
   'link',
@@ -28,7 +27,6 @@ export const formats = [
   'strike',
   'table',
   'underline',
-  'video',
 ];
 
 type EditorToolbarProps = {
@@ -95,8 +93,6 @@ export default function Toolbar({ id, isSimple, ...other }: EditorToolbarProps) 
 
         <div className="ql-formats">
           <button type="button" className="ql-link" />
-          <button type="button" className="ql-image" />
-          <button type="button" className="ql-video" />
         </div>
 
         <div className="ql-formats">
