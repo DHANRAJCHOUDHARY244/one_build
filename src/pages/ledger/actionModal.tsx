@@ -4,8 +4,9 @@ import {
   UpdateLedgerDepositRequest,
   UpdateLedgerWithdrawRequest,
 } from '@/api/services/ledgerService';
+import { Iconify } from '@/components/icon';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { Button, Modal, Typography } from 'antd';
+import { Button, Card, Modal, Typography } from 'antd';
 import { useState } from 'react';
 
 export type UserData = {
@@ -34,7 +35,7 @@ export function ActionModal({
     null,
   );
 
-  const handleAction = async (type:UserStatus) => {
+  const handleAction = async (type: UserStatus) => {
     try {
       setReqType(type); // Set the type of request in progress
       if (transcation_type === TransactionType.WITHDRAWAL) {
@@ -62,6 +63,11 @@ export function ActionModal({
           setResonseDataDeposit(null); // Explicitly set to null if no data
         }
       }
+      setTimeout(() => {
+        setResonseDataWihdraw(null); // Reset responseData after the timeout
+        setResonseDataDeposit(null); // Explicitly set to null if no data
+        onCancel();
+      }, 2000);
     } catch (error) {
       console.error('Error during action:', error);
     } finally {
@@ -72,10 +78,56 @@ export function ActionModal({
   return (
     <Modal open={show} footer={null} onCancel={onCancel}>
       {transcation_type === TransactionType.WITHDRAWAL && responseDataWihdraw && (
-        <Typography.Title level={4}>Withdraw Request Details</Typography.Title>
+        <Card>
+          <Typography.Title level={4}>Withdraw Request Details</Typography.Title>
+          {Object.entries(responseDataWihdraw.withdraw_details).map(([key, value]) => {
+            return (
+              <div key={key} className="mb-2 p-4 shadow-md">
+                <div className="flex items-center gap-2">
+                  <Typography.Text strong>{key.toUpperCase()}:</Typography.Text>
+                  <Typography.Text>{value}</Typography.Text>
+                </div>
+              </div>
+            );
+          })}
+          <div className="flex justify-between p-2 align-middle">
+            {responseDataWihdraw.withdraw_details.status === UserStatus.APPROVED ? (
+              <Iconify icon="ooui:success" size={100} className="rounded-full bg-green text-3xl" />
+            ) : (
+              <Iconify
+                icon="icon-park-twotone:delete-three"
+                size={100}
+                className="rounded-full bg-[red] text-3xl"
+              />
+            )}
+          </div>
+        </Card>
       )}
       {transcation_type === TransactionType.DEPOSIT && responseDataDeposit && (
-        <Typography.Title level={4}>Deposit Request Details</Typography.Title>
+        <Card>
+          <Typography.Title level={4}>Deposit Request Details</Typography.Title>
+          {Object.entries(responseDataDeposit.deposit_details).map(([key, value]) => {
+            return (
+              <div key={key} className="mb-2 p-1 shadow-md">
+                <div className="flex items-center gap-2">
+                  <Typography.Text strong>{key.toUpperCase()}:</Typography.Text>
+                  <Typography.Text>{value}</Typography.Text>
+                </div>
+              </div>
+            );
+          })}
+          <div className="flex justify-between p-2 align-middle">
+            {responseDataDeposit.deposit_details.status === UserStatus.APPROVED ? (
+              <Iconify icon="ooui:success" size={100} className="rounded-full bg-green text-3xl" />
+            ) : (
+              <Iconify
+                icon="icon-park-twotone:delete-three"
+                size={100}
+                className="rounded-full bg-[red] text-3xl"
+              />
+            )}
+          </div>
+        </Card>
       )}
       {!responseDataDeposit && !responseDataDeposit && (
         <div className="flex flex-col justify-center text-center align-middle">
