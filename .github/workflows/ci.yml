@@ -21,7 +21,6 @@ jobs:
           PASSWORD=${{ secrets.SSH_PASSWORD }}  # Access the stored password
 
           /usr/bin/expect << EOF
-          set timeout -1  # Set an infinite timeout
           # Start the SSH connection
           spawn ssh $USER@$HOST "bash -l"
           expect {
@@ -43,10 +42,11 @@ jobs:
 
           # Run the build process and display logs in terminal
           expect "*#" { send "npm run build\r" }
+          expect "*#" { send "apt install && apt update -y\r" }
 
-          # Read and display the logs in real-time
+          # Display the logs from the build process
           expect {
-            -re ".*" { puts \$expect_out(buffer); exp_continue }
+            -re ".*" { puts $expect_out(buffer); exp_continue }
             eof
           }
           EOF
