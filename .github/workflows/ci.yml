@@ -1,4 +1,4 @@
-name: CI
+name: Deploy to Remote Server
 
 on:
   push:
@@ -7,40 +7,30 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-deploy:
+  deploy:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
-      - name: Checkout 🛎️
+      - name: Checkout code 🛎️
         uses: actions/checkout@v3
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
+      - name: Install Expect
+        run: sudo apt-get install -y expect
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-
-      - name: Install and Build 🔧
+      - name: SSH and execute commands
         run: |
-          pnpm install
-          pnpm build
+          PASSWORD=${{ secrets.SSH_PASSWORD }}  # Store your password in GitHub secrets
+          HOST="194.238.22.108"
+          USER="root"
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          FOLDER: dist
-          CLEAN: true
-
-
+          /usr/bin/expect -c "
+          set timeout 10
+          spawn ssh $USER@$HOST
+          expect \"*?assword:*\" { send \"$PASSWORD\r\" }
+          expect \"*#\" { send \"cd /var/www/one-build-cms\r\" }
+          expect \"*#\" { send \"git pull\r\" }
+          expect \"*#\" { send \"npm install\r\" }
+          expect \"*#\" { send \"npm run build\r\" }
+          expect eof
+          "
