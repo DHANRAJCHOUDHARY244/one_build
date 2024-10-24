@@ -86,7 +86,7 @@ function ArticleList() {
       <div>
         {blogs.length > 0 ? (
           blogs.map((blog) => (
-            <div key={blog.id} className="flex space-x-4">
+            <div key={blog.id} className="flex space-x-4 p-1">
               <img src={blog.media.media_path} alt="Article" className="h-32 w-32 rounded object-cover" />
               <div>
                 <h3 className="text-lg font-bold">{blog.title}</h3>

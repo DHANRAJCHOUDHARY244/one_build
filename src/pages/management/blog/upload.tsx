@@ -8,23 +8,27 @@ interface UploadCropImageProps {
 }
 
 const UploadCropImage: React.FC<UploadCropImageProps> = ({ handleFileListUpdate }) => {
-  // State for storing the list of uploaded files
+  // State for storing the list of uploaded files (one file at a time)
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   // State for storing the uploaded image URL or base64 data
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   const onChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    // Log the uploaded file details
-    console.log("File List:", newFileList);
+    // Only allow one file at a time, so take the latest file only
+    const singleFileList = newFileList.slice(-1);
 
-    // Update the file list
-    setFileList(newFileList);
-    handleFileListUpdate(newFileList); // Send updated fileList to the parent
+    // Log the uploaded file details
+    console.log('File List:', singleFileList);
+
+    // Update the file list with the last selected file
+    setFileList(singleFileList);
+    handleFileListUpdate(singleFileList); // Send updated fileList to the parent
 
     // Set the uploaded image and notify the parent component
-    if (newFileList.length > 0 && newFileList[0].status === 'done') {
-      const thumbUrl = newFileList[0].thumbUrl || URL.createObjectURL(newFileList[0].originFileObj as File);
+    if (singleFileList.length > 0 && singleFileList[0].status === 'done') {
+      const thumbUrl =
+        singleFileList[0].thumbUrl || URL.createObjectURL(singleFileList[0].originFileObj as File);
       setUploadedImage(thumbUrl);
     }
   };
@@ -53,7 +57,7 @@ const UploadCropImage: React.FC<UploadCropImageProps> = ({ handleFileListUpdate 
           onPreview={onPreview}
           beforeUpload={() => false} // Prevent the automatic upload to the backend
         >
-          {fileList.length < 5 && '+ Upload'}
+          {fileList.length < 1 && '+ Upload'}
         </Upload>
       </ImgCrop>
 

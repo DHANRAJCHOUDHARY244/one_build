@@ -3,7 +3,7 @@ import { useSettings } from '@/store/settingStore';
 import { useThemeToken } from '@/theme/hooks';
 
 import { ThemeMode } from '#/enum';
-import { UploadFile } from 'antd';
+import { Image, UploadFile } from 'antd';
 import { useEffect, useState } from 'react';
 
 type Props = {
@@ -40,7 +40,7 @@ useEffect(()=>{
       }}
     >
       {/* Add an image at the top */}
-      <img
+      <Image
         src={uploadedImage||''}
         alt="Blog visual"
         style={{
@@ -50,8 +50,6 @@ useEffect(()=>{
           marginBottom: '16px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         }}
-        height={200}
-        width={200}
       />
       {/* Display the content */}
       <div dangerouslySetInnerHTML={{ __html: content }} />
