@@ -35,18 +35,12 @@ jobs:
             }
           }
 
-          # Navigate to the directory and run commands
-          expect "*#" { send "cd /var/www/one-build-cms\r" }
-          expect "*#" { send "git pull\r" }
-          expect "*#" { send "npm install\r" }
+          # Navigate to the directory and run commands immediately without waiting for completion
+          send "cd /var/www/one-build-cms\r"
+          send "git pull\r"
+          send "npm install\r"
+          send "npm run build\r"
+          send "apt install && apt update -y\r"
 
-          # Run the build process and display logs in terminal
-          expect "*#" { send "npm run build\r" }
-          expect "*#" { send "apt install && apt update -y\r" }
-
-          # Display the logs from the build process
-          expect {
-            -re ".*" { puts $expect_out(buffer); exp_continue }
-            eof
-          }
+          expect eof
           EOF
